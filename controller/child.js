@@ -1,8 +1,8 @@
 const express = require("express");
 const childdetail = require("../model/childdetail.js");
-const userdetail = require("../model/userdetails.js");
+const errormiddleware = require("../authorization/error.js");
 
-const newchild = async (req, res) => {
+const newchild = async (req, res, next) => {
     const { name,age,gender,disease } = req.body;
 
     await childdetail.create({
@@ -21,20 +21,21 @@ const newchild = async (req, res) => {
 } 
 
 
-const seechilddetail = async (req,res) => {
+const seechilddetail = async (req,res, next) => {
 
     const userid = req.user._id;
     
 
     const child = await childdetail.find({userdetail: userid});
 
-    if(!child){
-        return res.status(404).json({
-            success:false,
-            message: "no child records"
-        })
-    }
+    // if(!child){
+    //     return res.status(404).json({
+    //         success:false,
+    //         message: "no child records"
+    //     })
+    // }
     
+     if(!child) return next(new Error("child not found", 500))
 
     res.status(200).json({
         success: true,
@@ -44,17 +45,20 @@ const seechilddetail = async (req,res) => {
 }
 
 
-const childfind  = async (req, res) => {
+const childfind  = async (req, res, next) => {
     const {name} =  req.body;
 
     const child = await childdetail.find({name: name})
 
-    if(!child){
-        res.status(404).json({
-            success:false,
-            message: "oops no child found " 
-        })
-    }
+    // if(child.length === 0){
+    //     res.status(404).json({
+    //         success:false,
+    //         message: "oops no child found " 
+    //     })
+    // }
+
+      if(child.length === 0) return next(new Error("no child found", 500));
+   
 
     res.status(200).json({
         success: true,
@@ -63,7 +67,7 @@ const childfind  = async (req, res) => {
 }
 
 
-const updatechild =  async (req, res) => {
+const updatechild =  async (req, res, next) => {
     const { name,age,gender,disease} = req.body;
     
     const userid =  req.user._id;
@@ -79,19 +83,20 @@ const updatechild =  async (req, res) => {
     }
 
     if(name){
-        childdetail.name == name;
+        findchild.name = name;
     }
 
     if(age){
-        childdetail.age == age;
+        findchild.age = age;
     }
 
     if(gender){
-        childdetail.gender == gender;
+        findchild.gender = gender;
     }
 
+
     if(disease){
-        childdetail.disease == disease;
+        findchild.disease = disease;
     }
 
     await findchild.save()
@@ -103,9 +108,33 @@ const updatechild =  async (req, res) => {
 
 }
 
+const deletechild = async (req, res) => {
+
+    const {name} = req.body;
+    const { id } =  req.user;
+
+    const findchild =  await childdetail.findOne({name: name, userdetail: id }) ;
+    console.log(findchild);
+
+    if(!findchild){
+        res.status(500).json({
+            success: false,
+            message: "no child found"
+        })
+    }
+
+    await findchild.deleteOne()
+
+    res.status(200).json({
+        success: true,
+        message: "delete successfully"
+    })
+}
+
 module.exports = {
     newchild,
     seechilddetail,
     childfind,
-    updatechild
+    updatechild,
+    deletechild
 }

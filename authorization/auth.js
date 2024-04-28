@@ -12,7 +12,7 @@ const isauthenticated = async (req,res, next) => {
         })
      }
 
-    const decoded =  jwt.verify(token, process.env.secretkey);
+    const decoded =  jwt.verify(token, "hdicihfjiddcnjdidjeijfd");
 
     //console.log(decoded)
 
