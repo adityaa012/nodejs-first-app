@@ -31,9 +31,9 @@ app.use(errormiddleware)
 db()
 
 
-app.listen(5020, () => {
-    console.log("listening to the port")
-});
+app.listen(process.env.port_no, () => {
+    console.log(`listening to the port: ${process.env.port_no} in ${process.env.NODE_ENV} mode`)
+}); 
 
-
+  
 

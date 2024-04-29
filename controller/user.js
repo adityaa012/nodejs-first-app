@@ -65,7 +65,11 @@ const login = async(req, res) => {
 
 const logout = (req,res) => {
 
-    res.status(200).cookie( "token", "",{expires:new Date(Date.now())}).json({
+    res.status(200).cookie( "token", "",{
+        expires:new Date(Date.now()),
+        secure: process.env.NODE_ENV == "Development"? "lax": "none",
+        samesite: process.env.NODE_ENV == "Development"? false : true,
+    }).json({
         success: true,
         message: "logout successfully"
     })
